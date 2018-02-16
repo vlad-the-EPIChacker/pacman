@@ -72,6 +72,26 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def myDFScost(state,problem,prevLocations, cost):
+    if problem.isGoalState(state):
+        return (['Stop'],True,cost)
+    if state in prevLocations and prevLocations[state]==1:
+        return ([], False,-1)
+
+    prevLocations[state]=1
+    successors=problem.getSuccessors(state)
+    successors.reverse()
+    mini=([],False,-1)
+    for i in successors:
+        tempPath=myDFScost(i[0],problem,prevLocations,cost+i[2])
+        if tempPath[1]:
+            tempPath[0].append(i[1])
+            if tempPath[2]<mini[2] or mini[2]==-1:
+                mini=tempPath
+
+    prevLocations[state] = 0
+    return mini
+
 def myDFS(state,problem,prevLocations):
     if problem.isGoalState(state):
         return (['Stop'],True)
@@ -88,7 +108,6 @@ def myDFS(state,problem,prevLocations):
 
     prevLocations[state] = 0
     return ([],False)
-
 
 def depthFirstSearch(problem):
     """
@@ -112,16 +131,39 @@ def depthFirstSearch(problem):
     path = myDFS(problem.getStartState(),problem,{})[0]
     path.reverse()
     return path
-    util.raiseNotDefined()
+
+def myBFS(state,problem,successors):
+    queue=util.Queue()
+    visited={}
+    queue.push((state,[]))
+    while not queue.isEmpty():
+        current = queue.pop()
+        if problem.isGoalState(current[0]):
+            current[1].append('Stop')
+            return current[1]
+        successors = problem.getSuccessors(current[0])
+        successors.reverse()
+        for i in successors:
+            if i[0] not in visited or visited[i[0]]==0:
+                tempPush=(i[0],[j for j in current[1]])
+                tempPush[1].append(i[1])
+                visited[i[0]] = 1
+                queue.push(tempPush)
+    return state,[]
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    path=myBFS(problem.getStartState(),problem,problem.getSuccessors(problem.getStartState()))
+    return path
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    path = myDFScost(problem.getStartState(),problem,{},0)[0]
+    path.reverse()
+    return path
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
