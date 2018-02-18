@@ -89,7 +89,7 @@ def myDFScost(state,problem,prevLocations, cost):
             if tempPath[2]<mini[2] or mini[2]==-1:
                 mini=tempPath
 
-    prevLocations[state] = 0
+    #prevLocations[state] = 0
     return mini
 
 def myDFS(state,problem,prevLocations):
@@ -106,7 +106,7 @@ def myDFS(state,problem,prevLocations):
             tempPath[0].append(i[1])
             return tempPath
 
-    prevLocations[state] = 0
+    #prevLocations[state] = 0
     return ([],False)
 
 def depthFirstSearch(problem):
@@ -173,9 +173,34 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+def myAStarSearch(state,problem,prevLocations,cost,heuristic):
+    if problem.isGoalState(state):
+        return (['Stop'],True,cost)
+    if state in prevLocations and prevLocations[state]==1:
+        return ([], False,-1)
+
+    prevLocations[state]=1
+    successors=problem.getSuccessors(state)
+    successors.reverse()
+    priorQ = util.PriorityQueue()
+    for i in successors:
+        priorQ.push(i,heuristic(i[0],problem))
+    while not priorQ.isEmpty():
+        current=priorQ.pop()
+        tempPath=myAStarSearch(current[0],problem,prevLocations,cost+current[2],heuristic)
+        if tempPath[1]:
+            tempPath[0].append(current[1])
+            return tempPath
+
+    #prevLocations[state] = 0
+    return ([], False,-1)
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    path = myAStarSearch(problem.getStartState(),problem,{},0,heuristic)[0]
+    path.reverse()
+    return path
     util.raiseNotDefined()
 
 
