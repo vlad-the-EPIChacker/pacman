@@ -72,41 +72,46 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def myDFScost(state,problem,prevLocations, cost):
+def myDFScost(state,problem,prevLocations, cost,memory):
     if problem.isGoalState(state):
         return (['Stop'],True,cost)
     if state in prevLocations and prevLocations[state]==1:
         return ([], False,-1)
+    if state in memory.keys():
+        return memory[state]
 
     prevLocations[state]=1
     successors=problem.getSuccessors(state)
     successors.reverse()
     mini=([],False,-1)
     for i in successors:
-        tempPath=myDFScost(i[0],problem,prevLocations,cost+i[2])
+        tempPath=myDFScost(i[0],problem,prevLocations,cost+i[2],memory)
         if tempPath[1]:
             tempPath[0].append(i[1])
             if tempPath[2]<mini[2] or mini[2]==-1:
                 mini=tempPath
 
-    #prevLocations[state] = 0
+    prevLocations[state] = 0
+    memory[state]=mini
     return mini
 
-def myDFS(state,problem,prevLocations):
+def myDFS(state,problem,prevLocations,memory):
     if problem.isGoalState(state):
         return (['Stop'],True)
     if state in prevLocations and prevLocations[state]==1:
         return ([], False)
+    if state in memory.keys():
+        return memory[state]
 
     prevLocations[state]=1
     successors=problem.getSuccessors(state)
     for i in successors:
-        tempPath=myDFS(i[0],problem,prevLocations)
+        tempPath=myDFS(i[0],problem,prevLocations,memory)
         if tempPath[1]:
             tempPath[0].append(i[1])
+            memory[state]=tempPath
             return tempPath
-
-    #prevLocations[state] = 0
+    prevLocations[state] = 0
     return ([],False)
 
 def depthFirstSearch(problem):
@@ -128,7 +133,7 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
 
-    path = myDFS(problem.getStartState(),problem,{})[0]
+    path = myDFS(problem.getStartState(),problem,{},{})[0]
     path.reverse()
     return path
 
@@ -144,10 +149,10 @@ def myBFS(state,problem,successors):
         successors = problem.getSuccessors(current[0])
         successors.reverse()
         for i in successors:
-            if i[0] not in visited or visited[i[0]]==0:
+            if str(i[0]) not in visited or visited[str(i[0])]==0:
                 tempPush=(i[0],[j for j in current[1]])
                 tempPush[1].append(i[1])
-                visited[i[0]] = 1
+                visited[str(i[0])] = 1
                 queue.push(tempPush)
     return state,[]
 
@@ -161,7 +166,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    path = myDFScost(problem.getStartState(),problem,{},0)[0]
+    path = myDFScost(problem.getStartState(),problem,{},0,{})[0]
     path.reverse()
     return path
     util.raiseNotDefined()
@@ -173,11 +178,13 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-def myAStarSearch(state,problem,prevLocations,cost,heuristic):
+def myAStarSearch(state,problem,prevLocations,cost,heuristic,memory):
     if problem.isGoalState(state):
         return (['Stop'],True,cost)
     if state in prevLocations and prevLocations[state]==1:
         return ([], False,-1)
+    if state in memory.keys():
+        return memory[state]
 
     prevLocations[state]=1
     successors=problem.getSuccessors(state)
@@ -187,18 +194,19 @@ def myAStarSearch(state,problem,prevLocations,cost,heuristic):
         priorQ.push(i,heuristic(i[0],problem))
     while not priorQ.isEmpty():
         current=priorQ.pop()
-        tempPath=myAStarSearch(current[0],problem,prevLocations,cost+current[2],heuristic)
+        tempPath=myAStarSearch(current[0],problem,prevLocations,cost+current[2],heuristic,memory)
         if tempPath[1]:
             tempPath[0].append(current[1])
+            memory[state] = tempPath
             return tempPath
 
-    #prevLocations[state] = 0
+    prevLocations[state] = 0
     return ([], False,-1)
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    path = myAStarSearch(problem.getStartState(),problem,{},0,heuristic)[0]
+    path = myAStarSearch(problem.getStartState(),problem,{},0,heuristic,{})[0]
     path.reverse()
     return path
     util.raiseNotDefined()
