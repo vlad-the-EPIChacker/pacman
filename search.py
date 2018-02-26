@@ -72,29 +72,6 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def myDFScost(state,problem,prevLocations, cost,memory):
-    if problem.isGoalState(state):
-        return (['Stop'],True,cost)
-    if state in prevLocations and prevLocations[state]==1:
-        return ([], False,-1)
-    if state in memory.keys():
-        return memory[state]
-
-    prevLocations[state]=1
-    successors=problem.getSuccessors(state)
-    successors.reverse()
-    mini=([],False,-1)
-    for i in successors:
-        tempPath=myDFScost(i[0],problem,prevLocations,cost+i[2],memory)
-        if tempPath[1]:
-            tempPath[0].append(i[1])
-            if tempPath[2]<mini[2] or mini[2]==-1:
-                mini=tempPath
-
-    prevLocations[state] = 0
-    memory[state]=mini
-    return mini
-
 def myDFS(state,problem,prevLocations,memory):
     if problem.isGoalState(state):
         return (['Stop'],True)
@@ -163,11 +140,36 @@ def breadthFirstSearch(problem):
     path=myBFS(problem.getStartState(),problem,problem.getSuccessors(problem.getStartState()))
     return path
 
+def myDFScost(state,problem,prevLocations, cost,memory):
+    if problem.isGoalState(state):
+        return ([],True,cost)
+    if state in prevLocations and prevLocations[state]==1:
+        return ([], False,-1)
+    if state in memory.keys() and memory[state][2]>-1 and cost>-1 and memory[state][2]<=cost:
+        return ([], False,-1)
+
+    prevLocations[state]=1
+    successors=problem.getSuccessors(state)
+    successors.reverse()
+    mini=([],False,-1)
+    for i in successors:
+        tempPath=myDFScost(i[0],problem,prevLocations,cost+i[2],memory)
+        if tempPath[1]:
+            tempPath[0].append(i[1])
+            if tempPath[2]<mini[2] or mini[2]==-1:
+                mini=tempPath
+                memory[state]=([ii for ii in tempPath[0]],True,cost)
+
+    prevLocations[state] = 0
+    return mini
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     path = myDFScost(problem.getStartState(),problem,{},0,{})[0]
     path.reverse()
+    print(path)
+    print("length of path:",len(path))
     return path
     util.raiseNotDefined()
 
