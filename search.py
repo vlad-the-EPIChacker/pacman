@@ -165,7 +165,7 @@ def myDFScost(state,problem,prevLocations, cost,memory):
 
 def myBFScost(state,problem):
     queue = util.PriorityQueue()
-    visited = {}
+    visited = []
     queue.push((state, [],0),0)
     while not queue.isEmpty():
         current = queue.pop()
@@ -174,10 +174,10 @@ def myBFScost(state,problem):
         successors = problem.getSuccessors(current[0])
         successors.reverse()
         for i in successors:
-            if str(i[0]) not in visited or visited[str(i[0])] == 0:
+            if i[0] not in visited:
                 tempPush = (i[0], [j for j in current[1]],current[2]+i[2])
                 tempPush[1].append(i[1])
-                visited[str(i[0])] = 1
+                visited.append(i[0])
                 queue.push(tempPush,tempPush[2])
     return ['Stop']
 
