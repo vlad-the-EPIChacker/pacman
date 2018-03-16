@@ -224,11 +224,30 @@ def myAStarSearch(state,problem,prevLocations,cost,heuristic,memory):
     prevLocations[str(state)] = 0
     return ([], False,-1)
 
+def myBFSAStarSearch(state,problem,heuristic):
+    queue = util.PriorityQueue()
+    visited = []
+    queue.push((state, [],0),0)
+    while not queue.isEmpty():
+        current = queue.pop()
+        if problem.isGoalState(current[0]):
+            return current[1]
+        successors = problem.getSuccessors(current[0])
+        successors.reverse()
+        for i in successors:
+            if i[0] not in visited:
+                tempPush = (i[0], [j for j in current[1]],current[2]+i[2])
+                tempPush[1].append(i[1])
+                visited.append(i[0])
+                queue.push(tempPush,heuristic(current,problem))
+    return ['Stop']
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    path = myAStarSearch(problem.getStartState(),problem,{},0,heuristic,{})[0]
-    path.reverse()
+    #path = myAStarSearch(problem.getStartState(),problem,{},0,heuristic,{})[0]
+    #path.reverse()
+    path = myBFSAStarSearch(problem.getStartState(), problem, heuristic)
     return path
     util.raiseNotDefined()
 
